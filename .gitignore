@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+denoise_env/
+venv/
+hf_login.py
+.env
+
+# Model weights
+*.pth
+*.pt
+*.onnx
+
+# Dataset & outputs
+dataset/
+outputs/
+outputs/**
+# OS
+.DS_Store
+Thumbs.db

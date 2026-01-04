@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Denoising with Filters and Vision Transformer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ---------- GLOBAL ---------- */
+body{
+    font-family: 'Poppins', sans-serif;
+    background: #007193; /* professional slate blue */
+    margin: 0;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* ---------- HEADER ---------- */
+header{
+    text-align: center;
+    padding: 35px 20px;
+}
+header h1{
+    font-size: 34px;
+    font-weight: 600;
+}
+
+/* ---------- MAIN CONTAINER ---------- */
+.container{
+    max-width: 1100px;
+    margin: 0 auto 50px;
+    background: #f8fafc;
+    color: #1e293b;
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}
+
+/* ---------- FORM ---------- */
+form{
+    text-align: center;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+input[type="file"], select{
+    padding: 12px 18px;
+    font-size: 15px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    margin: 10px;
+}
+
+select{
+    background: #ffffff;
+    cursor: pointer;
+}
+
+button{
+    padding: 12px 22px;
+    font-size: 15px;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover{
+    background: #1e40af;
+}
+
+/* ---------- IMAGE SECTION ---------- */
+.images{
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.card{
+    width: 50%;
+    text-align: center;
+}
+
+.card h3{
+    margin-bottom: 10px;
+}
+
+.card img{
+    width: 100%;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.3);
+}
+
+/* ---------- METRICS ---------- */
+.metrics{
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 30px;
+}
+
+.metric{
+    background: #ffffff;
+    padding: 18px 35px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,.2);
+}
+
+.metric span{
+    font-size: 14px;
+    color: #475569;
+}
+
+.metric strong{
+    display: block;
+    font-size: 22px;
+    color: #1e3a8a;
+}
+
+/* ---------- PREVIOUS RESULTS ---------- */
+.previous{
+    margin-top: 45px;
+}
+
+.previous h2{
+    margin-bottom: 15px;
+}
+
+.prev-table{
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0,0,0,.2);
+}
+
+.prev-table th,
+.prev-table td{
+    padding: 14px;
+    text-align: center;
+}
+
+.prev-table th{
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.prev-table tr:nth-child(even){
+    background: #f8fafc;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:900px){
+    .images{
+        flex-direction: column;
+    }
+    .card{
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Image Denoising with Filters and Vision Transformer</h1>
+</header>
+
+<div class="container">
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" required>
+
+    <select name="method" required>
+        <option value="" disabled selected>-- Not Selected --</option>
+        <option value="gaussian">Gaussian Filter</option>
+        <option value="median">Median Filter</option>
+        <option value="bilateral">Bilateral Filter</option>
+        <option value="vit">Vision Transformer</option>
+    </select>
+
+    <br>
+    <button type="submit">Apply Denoising</button>
+</form>
+
+{% if show %}
+
+<!-- Images -->
+<div class="images">
+    <div class="card">
+        <h3>Input Image</h3>
+        <img src="/static/input.jpg">
+    </div>
+
+    <div class="card">
+        <h3>Output Image</h3>
+        <img src="/static/output.jpg">
+    </div>
+</div>
+
+<!-- Current Metrics -->
+<div class="metrics">
+    <div class="metric">
+        <span>Output PSNR (dB)</span>
+        <strong>{{ output_psnr }}</strong>
+    </div>
+    <div class="metric">
+        <span>Output SSIM</span>
+        <strong>{{ output_ssim }}</strong>
+    </div>
+</div>
+
+<!-- Previous Results -->
+{% if history %}
+<div class="previous">
+    <h2>Previous Results (Last 4)</h2>
+
+    <table class="prev-table">
+        <tr>
+            <th>Method</th>
+            <th>PSNR (dB)</th>
+            <th>SSIM</th>
+        </tr>
+        {% for item in history %}
+        <tr>
+            <td>{{ item.method }}</td>
+            <td>{{ item.psnr }}</td>
+            <td>{{ item.ssim }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+{% endif %}
+
+</div>
+
+</body>
+</html>
