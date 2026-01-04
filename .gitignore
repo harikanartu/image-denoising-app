@@ -5,6 +5,8 @@ __pycache__/
 # Virtual environment
 denoise_env/
 venv/
+
+
 hf_login.py
 .env
 
