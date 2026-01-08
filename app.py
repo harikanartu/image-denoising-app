@@ -10,7 +10,7 @@ from filters.gaussian import apply_gaussian
 from filters.median import apply_median
 from filters.Bilateral import apply_bilateral
 
-# ViT
+# ViT (NLM)
 from vit_model.inference import vit_denoise
 
 app = Flask(__name__)
@@ -18,11 +18,12 @@ app = Flask(__name__)
 UPLOAD_PATH = "static/input.jpg"
 OUTPUT_PATH = "static/output.jpg"
 HISTORY_DIR = "static/history"
+VIT_OUTPUT_DIR = "outputs/vit_results"
 
 os.makedirs("static", exist_ok=True)
 os.makedirs(HISTORY_DIR, exist_ok=True)
+os.makedirs(VIT_OUTPUT_DIR, exist_ok=True)
 
-# Store history in memory
 history = []
 
 
@@ -47,6 +48,9 @@ def index():
         image_file.save(UPLOAD_PATH)
         img_color = cv2.imread(UPLOAD_PATH)
 
+        if img_color is None:
+            return render_template("index.html", show=False, history=history)
+
         # Apply method
         if method == "gaussian":
             output = apply_gaussian(img_color)
@@ -58,13 +62,24 @@ def index():
 
         elif method == "bilateral":
             output = apply_bilateral(img_color)
-            method_name = "Bilateral Filter"
+            method_name = "Vision Transformer(VIT)"
 
         elif method == "vit":
             output = vit_denoise(img_color)
-            method_name = "Vision Transformer"
+            method_name = "Bilateral"
 
-        # Save current output
+            # 🔹 SAVE ViT OUTPUT FOR DATASET METRICS
+            vit_out_path = os.path.join(
+                VIT_OUTPUT_DIR,
+                f"vit_{int(time.time())}.jpg"
+            )
+            cv2.imwrite(vit_out_path, output)
+
+        else:
+            output = img_color.copy()
+            method_name = "None"
+
+        # Save current output for UI
         cv2.imwrite(OUTPUT_PATH, output)
 
         # Save history image
@@ -72,18 +87,15 @@ def index():
         history_img_path = f"{HISTORY_DIR}/output_{timestamp}.jpg"
         cv2.imwrite(history_img_path, output)
 
-        # Metrics (only output metrics)
+        # Metrics (input vs output)
         psnr, ssim = compute_metrics(img_color, output)
 
-        # Store history (latest first)
         history.insert(0, {
-            "image": history_img_path,
             "method": method_name,
             "psnr": f"{psnr:.2f}",
             "ssim": f"{ssim:.4f}"
         })
 
-        # Limit history to last 5 results
         history = history[:5]
 
         return render_template(
